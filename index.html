@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Deriv - Bot</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background: #121212; color: #fff; }
+        .box { background: #1e1e1e; padding: 30px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        button { background: #28a745; color: white; border: none; padding: 12px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #218838; }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h2>Painel Bot Deriv</h2>
+        <h3 id="status-conexao" style="color: #ffc107;">⏳ Conectando ao Bot...</h3>
+        <p><strong>Saldo:</strong> <span id="saldo-conta">Carregando...</span></p>
+        <p><strong>Último Tick R_100:</strong> <span id="tick-r100">Aguardando...</span></p>
+        <br>
+        <button onclick="comprarCall()">Comprar CALL ($1)</button>
+    </div>
+
+    <script>
+        let wsLocal = new WebSocket("ws://127.0.0.1:8765");
+
+        wsLocal.onopen = function() {
+            document.getElementById("status-conexao.innerText") = "✅ Conectado!";
+            document.getElementById("status-conexao").style.color = "#4CAF50";
+        };
+
+        wsLocal.onmessage = function(event) {
+            const dados = JSON.parse(event.data);
+            if (dados.type === "sync_balance") {
+                document.getElementById("saldo-conta").innerText = dados.balance;
+            } else if (dados.type === "tick") {
+                if (dados.symbol === "R_100") {
+                    document.getElementById("tick-r100").innerText = dados.quote;
+                }
+            }
+        };
+
+        wsLocal.onclose = function() {
+            document.getElementById("status-conexao").innerText = "⚠️ Desconectado do Python";
+            document.getElementById("status-conexao").style.color = "#ff444f";
+        };
+
+        function comprarCall() {
+            if (wsLocal && wsLocal.readyState === WebSocket.OPEN) {
+                wsLocal.send(JSON.stringify({
+                    action: "buy",
+                    symbol: "R_100",
+                    direction: "CALL",
+                    stake: 1.0,
+                    duration: 5
+                }));
+            }
+        }
+    </script>
+</body>
+</html>
