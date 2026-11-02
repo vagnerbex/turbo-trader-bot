@@ -136,8 +136,8 @@ async def main():
     # Inicia a gestão da Deriv numa thread em segundo plano
     threading.Thread(target=gerenciar_deriv, daemon=True).start()
     
-    print("🤖 Servidor Local WebSocket iniciado em ws://127.0.0.1:8765")
-    async with websockets.server.serve(handler_cliente, "127.0.0.1", 8765):
+    print("🤖 Servidor Local WebSocket iniciado em ws://0.0.0.0:8765")
+    async with websockets.server.serve(handler_cliente, "0.0.0.0", 8765):
         await asyncio.Future()
 
 if __name__ == "__main__":
